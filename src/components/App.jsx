@@ -6,14 +6,34 @@ import ContactList from './ContactList/ContactList';
 
 export class App extends Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: [],
     filter: '',
+    isAdd: false,
+    isDelete: false,
   };
+  componentDidMount() {
+    const localData = localStorage.getItem('contact');
+    if (localData) {
+      this.setState({ contacts: JSON.parse(localData) });
+    }
+  }
+  componentDidUpdate(_, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem('contact', JSON.stringify(this.state.contacts));
+    }
+    if (prevState.contacts.length < this.state.contacts.length) {
+      this.setState({ isAdd: true });
+      setTimeout(() => {
+        this.setState({ isAdd: false });
+      }, 1500);
+    }
+    if (prevState.contacts.length > this.state.contacts.length) {
+      this.setState({ isDelete: true });
+      setTimeout(() => {
+        this.setState({ isDelete: false });
+      }, 1500);
+    }
+  }
   findContacts = e => {
     this.setState({ filter: e.currentTarget.value });
   };
@@ -47,6 +67,10 @@ export class App extends Component {
       <div className="container">
         <h2 className="title">Phonebook</h2>
         <ContactForm onSubmit={this.addContacts} />
+        {this.state.isAdd && <div role="alert">Add number successfully!</div>}
+        {this.state.isDelete && (
+          <div role="alert">Deleted number successfully!</div>
+        )}
 
         <Filter filterData={this.state.filter} onChange={this.findContacts} />
         <h2 className="title">Contacts</h2>
